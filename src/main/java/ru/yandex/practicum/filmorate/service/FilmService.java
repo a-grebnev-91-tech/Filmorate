@@ -1,45 +1,65 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.storage.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
+@Slf4j
 @Service
 public class FilmService {
     private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
     private final GenreStorage genreStorage;
     private final LikesStorage likesStorage;
+    private final DirectorService directorsStorage;
+    private final EventsStorage eventsStorage;
 
     @Autowired
     public FilmService(FilmStorage filmStorage,
+                       UserStorage userStorage,
+                       EventsStorage eventsStorage,
                        GenreStorage genreStorage,
-                       LikesStorage likesStorage) {
+                       LikesStorage likesStorage,
+                       DirectorService directorsStorage) {
         this.filmStorage = filmStorage;
         this.genreStorage = genreStorage;
         this.likesStorage = likesStorage;
+        this.directorsStorage = directorsStorage;
+        this.eventsStorage = eventsStorage;
+        this.userStorage = userStorage;
     }
 
-    //если б rate для этого создали, то на входи не поступали бы фильмы с rate = 4
-    //и их не пришлось бы обнулять
     public Film addFilm(Film film) {
+        film.setRate(0);
         long idFilm = filmStorage.addFilm(film);
         genreStorage.addGenresToFilm(film, idFilm);
-        //likesStorage.updateRate(film.getId());
+        film.setId(idFilm);
+        addDirectorInFilm(film);
         return getFilmById(idFilm);
     }
 
     public Film getFilmById(long id) {
-        Film film = filmStorage.getFilmById(id);
+        Film film;
+        try {
+            film = filmStorage.getFilmById(id);
+        } catch (EmptyResultDataAccessException ex) {
+            throw new ModelNotFoundException("Film wasn't found");
+        }
         film.setLikes(likesStorage.getLikes(id));
         film.setGenres(getGenresByFilmId(id));
+        film.setDirectors(new HashSet<>(directorsStorage.getDirectorsByFilm(id)));
         return film;
     }
 
@@ -48,22 +68,31 @@ public class FilmService {
     }
 
     public Film changeFilm(Film film) {
-        if (getFilms().stream().anyMatch(x -> x.getId() == film.getId())) {
-            filmStorage.changeFilm(film);
-            genreStorage.changeFilmGenres(film);
-        } else {
-            throw new ModelNotFoundException("Film not found with id " + film.getId());
+        try {
+            filmStorage.getFilmById(film.getId());
+        } catch (EmptyResultDataAccessException ex) {
+            throw new ModelNotFoundException("Film wasn't found");
         }
-        return getFilmById(film.getId());
-    }
-    public void like(long id, long userId) {
-        likesStorage.like(id, userId);
+        filmStorage.changeFilm(film);
+        genreStorage.changeFilmGenres(film);
+        directorsStorage.updateDirectorToFilm(film);
+        return film;
     }
 
-    public void deleteLike(long id, long userId) {
-        Film film = getFilmById(id);
+    public void like(long filmId, long userId) {
+        likesStorage.like(filmId, userId);
+        likesStorage.updateRate(filmId);
+        Event event = new Event(userId, filmId, EventType.LIKE, EventOperations.ADD);
+        eventsStorage.addEvent(event);
+    }
+
+    public void deleteLike(long filmId, long userId) {
+        Film film = getFilmById(filmId);
         if (film.getLikes().contains(userId)) {
-            likesStorage.deleteLike(id, userId);
+            likesStorage.deleteLike(filmId, userId);
+            likesStorage.updateRate(filmId);
+            Event event = new Event(userId, filmId, EventType.LIKE, EventOperations.REMOVE);
+            eventsStorage.addEvent(event);
         } else {
             throw new ModelNotFoundException("User not found with id " + userId);
         }
@@ -71,18 +100,107 @@ public class FilmService {
 
     public List<Film> getFilms() {
         List<Film> films = filmStorage.getFilms();
-        for(Film film : films) {
-            film.setGenres(getGenresByFilmId(film.getId()));
-            film.setLikes(likesStorage.getLikes(film.getId()));
-        }
+        films.forEach(this::constructFilm);
         return films;
     }
 
     public List<Film> getPopularFilms(int count) {
-        return likesStorage.getPopularFilms(count);
+        List<Film> films = likesStorage.getPopularFilms(count);
+        films.forEach(this::constructFilm);
+        return films;
     }
 
     public boolean checkDate(Film film) {
         return film.getReleaseDate().isAfter(LocalDate.of(1895, 12, 28));
+    }
+
+    public void deleteFilm(long id) {
+        getFilmById(id);
+        filmStorage.deleteFilm(id);
+    }
+
+    public void deleteDirectorInFilm(long filmId, long directorId) {
+        log.info("Start filmService. Method deleteDirectorInFilm. directorId:{},  filmId{}.", directorId, filmId);
+        directorsStorage.deleteDirectorFromFilm(filmId, directorId);
+    }
+
+    public void addDirectorInFilm(Film film) {
+        log.info("Start filmService. Method addDirectorInFilm. film:{}.", film);
+        List<Director> directors = new ArrayList<>(film.getDirectors());
+        for (Director director : directors) {
+            directorsStorage.addDirectorToFilm(film, director.getId());
+        }
+    }
+
+    public List<Film> getSortedFilmsByDirector(Long directorId, String sortBy) {
+        log.info("Start filmService. Method getSortFilmByDirector. directorId:{}, parameter:{}.", directorId, sortBy);
+        directorsStorage.getDirector(directorId);
+        List<Film> films;
+        switch (sortBy) {
+            case "year":
+                films = filmStorage.getFilmsByDirectorSortedByYear(directorId);
+                break;
+            case "likes":
+                films = filmStorage.getFilmsByDirectorSortedByLikes(directorId);
+                break;
+            default:
+                throw new ModelNotFoundException("Wrong sort");
+        }
+        films.forEach(this::constructFilm);
+        return films;
+    }
+
+    public List<Film> getPopularFilmsSharedWithFriend(long userId, long friendId) {
+        List<Film> films = filmStorage.getPopularFilmsSharedWithFriend(userId, friendId);
+        films.forEach(this::constructFilm);
+        return films;
+    }
+
+    public List<Film> getPopularFilmsByGenreAndYear(int limit, Optional<Long> genreId, Optional<Long> year) {
+        List<Film> films;
+        if (genreId.isEmpty() && year.isEmpty()) {
+            films = getPopularFilms(limit);
+        } else if (genreId.isPresent() && year.isEmpty()) {
+            films = filmStorage.getPopularFilmsByGenre(limit, genreId.get());
+        } else if (genreId.isEmpty()) {
+            films = filmStorage.getPopularFilmsByYear(limit, year.get());
+        } else {
+            films = filmStorage.getPopularFilmsByGenreAndYear(limit, genreId.get(), year.get());
+        }
+        films.forEach(this::constructFilm);
+        return films;
+    }
+
+    public List<Film> getRecommendations(long userId) {
+        userStorage.findUserById(userId);
+        List<Long> recommendationsIds = likesStorage.getRecommendations(userId);
+        List<Film> recommendations = filmStorage.getFilms(recommendationsIds);
+        recommendations.forEach(this::constructFilm);
+        return recommendations;
+    }
+
+    public List<Film> searchFilm(String query, List<String> by) {
+        List<Film> films = new ArrayList<>();
+        for (String sortBy : by) {
+            switch (sortBy) {
+                case "title":
+                    films.addAll(filmStorage.searchByTitles(query));
+                    break;
+                case "director":
+                    films.addAll(filmStorage.searchByDirectors(query));
+                    break;
+                default:
+                    throw new ValidationException("Bad search argument");
+            }
+        }
+        films.forEach(this::constructFilm);
+        films.sort(((o1, o2) -> Integer.compare(o2.getRate(), o1.getRate())));
+        return films;
+    }
+
+    private void constructFilm(Film film) {
+        film.setGenres(getGenresByFilmId(film.getId()));
+        film.setLikes(likesStorage.getLikes(film.getId()));
+        film.setDirectors(new HashSet<>(directorsStorage.getDirectorsByFilm(film.getId())));
     }
 }

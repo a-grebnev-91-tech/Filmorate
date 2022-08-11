@@ -3,9 +3,7 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.springframework.data.annotation.Id;
 
-import javax.persistence.*;
 import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -47,8 +45,6 @@ public class User {
         this.birthday = birthday;
     }
 
-
-
     public User() {
         id = 0;
     }
@@ -67,7 +63,6 @@ public class User {
         values.put("login", login);
         values.put("user_name", name);
         values.put("birth_date", birthday);
-
         return values;
     }
 }

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class MyExceptionHandler {
 
     @ExceptionHandler({ModelNotFoundException.class})
-    public ResponseEntity<String> handlerNotFoundUserOrFilm(RuntimeException ex) {
+    public ResponseEntity<String> handlerNotFoundUserOrFilm(ModelNotFoundException ex) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(ex.getMessage());
@@ -41,6 +41,6 @@ public class MyExceptionHandler {
     public ResponseEntity<String> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ex.getMessage());
+                .body("Not valid");
     }
 }

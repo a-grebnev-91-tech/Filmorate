@@ -14,5 +14,7 @@ public interface LikesStorage {
 
     List<Film> getPopularFilms(int count);
 
-    public void updateRate(long filmId);
+    void updateRate(long filmId);
+
+    List<Long> getRecommendations(long userId);
 }

@@ -9,10 +9,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Data
 @AllArgsConstructor
@@ -21,6 +18,7 @@ public class Film {
     private long id;
     private Set<Long> likes = new HashSet<>();
     private Set<Genre> genres = new HashSet<>();
+    private Set<Director> Directors = new HashSet<>();
 
     @NotBlank(message = "Name cannot be blank")
     private String name;
@@ -39,7 +37,8 @@ public class Film {
 
     private int rate;
 
-    public Film() {}
+    public Film() {
+    }
 
     public Film(long id, String name, String description, LocalDate releaseDate, int duration, int rate, Mpa mpa) {
         this.id = id;
@@ -77,5 +76,9 @@ public class Film {
         values.put("mpa_id", mpa.getId());
 
         return values;
+    }
+
+    public void addDirector(Director director) {
+        this.Directors.add(director);
     }
 }

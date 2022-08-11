@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
@@ -12,8 +13,6 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 
@@ -28,18 +27,18 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<User> getAllUsers() {
-        String sql = "select * from USERR";
+        String sql = "SELECT * FROM USERS";
         return jdbcTemplate.query(sql, this::mapRowToUser);
     }
 
     @Override
     public User addUser(User user) {
         List<User> users = getAllUsers();
-        if(users.contains(user)) {
+        if (users.contains(user)) {
             throw new ModelAlreadyExistException("User already exist");
         } else {
             SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate)
-                    .withTableName("userr")
+                    .withTableName("users")
                     .usingGeneratedKeyColumns("user_id");
             long id = insert.executeAndReturnKey(user.toMap()).longValue();
             return findUserById(id);
@@ -47,59 +46,49 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User changeUSer(User user) {
-        Collection<User> users = getAllUsers();
-        if (users.stream().anyMatch(x -> x.getId() == user.getId())) {
-            String sql = "update userr set email = ?, login = ?, user_name = ?, birth_date = ?" +
-                    " where user_id = ?";
-            jdbcTemplate.update(sql,
-                    user.getEmail(),
-                    user.getLogin(),
-                    user.getName(),
-                    user.getBirthday(),
-                    user.getId());
-            return findUserById(user.getId());
-        } else {
-            throw new ModelNotFoundException("User not found with id " + user.getId());
-        }
+    public User changeUser(User user) {
+        String sql = "UPDATE users SET email = ?, login = ?, user_name = ?, birth_date = ? " +
+                "WHERE user_id = ?";
+        jdbcTemplate.update(sql,
+                user.getEmail(),
+                user.getLogin(),
+                user.getName(),
+                user.getBirthday(),
+                user.getId());
+        return findUserById(user.getId());
     }
 
     @Override
     public User findUserById(long id) {
-        Collection<User> users = getAllUsers();
-        if(users.stream().noneMatch(x -> x.getId() == id)) {
-            throw new ModelNotFoundException("User not found");
-        } else {
-            String sql = "SELECT * FROM userr WHERE user_id = ?";
+        try {
+            String sql = "SELECT * FROM users " +
+                    "WHERE user_id = ?";
             return jdbcTemplate.queryForObject(sql, this::mapRowToUser, id);
+        } catch (EmptyResultDataAccessException ex) {
+            throw new ModelNotFoundException("User wasn't found");
         }
     }
 
     @Override
     public List<User> getUserFriends(long id) {
-        List<User> userFriends = new ArrayList<>();
+        String sqlQuery = "SELECT * FROM users " +
+                "WHERE user_id IN " +
+                "(SELECT friend_id " +
+                "FROM friends " +
+                "WHERE user_id = ?)";
 
-        String sql = "select friend_id from friends where user_id = ?";
-
-        List<Long> friendsId = jdbcTemplate.query(sql, this::rowMapToLongIdFriends, id);
-
-        for (Long idLong : friendsId) {
-            userFriends.add(findUserById(idLong));
-        }
-        return userFriends;
+        return jdbcTemplate.query(sqlQuery, this::mapRowToUser, id);
     }
 
-    private long rowMapToLongIdFriends(ResultSet resultSet, int rowNum) throws SQLException {
-        return resultSet.getLong("friend_id");
-    }
-
+    @Override
     public boolean deleteUser(long id) {
-        String sql = "delete from userr where user_id = ?";
+        String sql = "DELETE FROM users " +
+                "WHERE user_id = ?";
         return jdbcTemplate.update(sql, id) > 0;
     }
 
     public boolean deleteAllUsers() {
-        String sql = "delete from userr";
+        String sql = "DELETE FROM users";
         return jdbcTemplate.update(sql) > 0;
     }
 

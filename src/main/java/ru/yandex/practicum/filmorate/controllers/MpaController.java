@@ -13,7 +13,7 @@ import java.util.List;
 @RestController
 @Slf4j
 public class MpaController {
-    MpaService mpaService;
+    private final MpaService mpaService;
 
     @Autowired
     public MpaController(MpaService mpaService) {
@@ -22,7 +22,7 @@ public class MpaController {
 
     @GetMapping("/mpa/{id}")
     public Mpa getMpaById(@PathVariable int id) {
-        log.info(String.format("Get MPA %d", id));
+        log.info("Get MPA {}", id);
         return mpaService.getMpaById(id);
     }
 

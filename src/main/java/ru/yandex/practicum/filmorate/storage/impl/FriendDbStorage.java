@@ -27,13 +27,15 @@ public class FriendDbStorage implements FriendStorage {
 
     @Override
     public void deleteFromFriends(long userId, long friendId) {
-        String sql = "delete from friends where user_id = ? and friend_id = ?";
+        String sql = "DELETE FROM friends " +
+                "WHERE user_id = ? AND friend_id = ?";
         jdbcTemplate.update(sql, userId, friendId);
     }
 
     @Override
     public List<Long> getUserFriends(long id) {
-        String sql = "SELECT friend_id FROM friends WHERE user_id = ?";
+        String sql = "SELECT friend_id FROM friends " +
+                "WHERE user_id = ?";
         return jdbcTemplate.query(sql, this::rowMapToLongIdFriends, id);
     }
 
