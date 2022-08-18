@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.storage.*;
@@ -51,7 +51,7 @@ public class FilmService {
         try {
             film = filmStorage.getFilmById(id);
         } catch (EmptyResultDataAccessException ex) {
-            throw new ModelNotFoundException("Film wasn't found");
+            throw new NotFoundException("Film wasn't found");
         }
         film.setLikes(likesStorage.getLikes(id));
         film.setGenres(getGenresByFilmId(id));
@@ -67,7 +67,7 @@ public class FilmService {
         try {
             filmStorage.getFilmById(film.getId());
         } catch (EmptyResultDataAccessException ex) {
-            throw new ModelNotFoundException("Film wasn't found");
+            throw new NotFoundException("Film wasn't found");
         }
         filmStorage.updateFilm(film);
         genreStorage.changeFilmGenres(film);
@@ -90,7 +90,7 @@ public class FilmService {
             Event event = new Event(userId, filmId, EventType.LIKE, EventOperations.REMOVE);
             eventsStorage.addEvent(event);
         } else {
-            throw new ModelNotFoundException("User not found with id " + userId);
+            throw new NotFoundException("User not found with id " + userId);
         }
     }
 
@@ -104,10 +104,6 @@ public class FilmService {
         List<Film> films = likesStorage.getPopularFilms(count);
         films.forEach(this::constructFilm);
         return films;
-    }
-
-    public boolean checkDate(Film film) {
-        return film.getReleaseDate().isAfter(LocalDate.of(1895, 12, 28));
     }
 
     public void deleteFilm(long id) {
@@ -140,7 +136,7 @@ public class FilmService {
                 films = filmStorage.getFilmsByDirectorSortedByLikes(directorId);
                 break;
             default:
-                throw new ModelNotFoundException("Wrong sort");
+                throw new NotFoundException("Wrong sort");
         }
         films.forEach(this::constructFilm);
         return films;

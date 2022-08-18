@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.EventsStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
@@ -39,7 +39,7 @@ public class ReviewService {
             eventsStorage.addEvent(event);
             return review;
         } else {
-            throw new ModelNotFoundException("Model not found");
+            throw new NotFoundException("Model not found");
         }
     }
 
@@ -66,7 +66,7 @@ public class ReviewService {
         try {
             return reviewStorage.getReview(id);
         } catch (EmptyResultDataAccessException ex) {
-            throw new ModelNotFoundException(String.format("Review with id %d isn't exist", id));
+            throw new NotFoundException(String.format("Review with id %d isn't exist", id));
         }
     }
 

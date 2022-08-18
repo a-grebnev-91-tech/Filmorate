@@ -5,7 +5,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -58,7 +58,7 @@ public class UserDbStorage implements UserStorage {
                             "WHERE user_id = ?";
             return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToUser, id);
         } catch (EmptyResultDataAccessException ex) {
-            throw new ModelNotFoundException("User wasn't found");
+            throw new NotFoundException("User wasn't found");
         }
     }
 

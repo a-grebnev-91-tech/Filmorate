@@ -2,11 +2,11 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
-import ru.yandex.practicum.filmorate.storage.validators.DirectorValidate;
+import ru.yandex.practicum.filmorate.validator.DirectorValidate;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +33,7 @@ public class DirectorService {
         if (director.isPresent()) {
             return director.get();
         } else {
-            throw new ModelNotFoundException(String.format("Not found director %s", directorId));
+            throw new NotFoundException(String.format("Not found director %s", directorId));
         }
     }
 

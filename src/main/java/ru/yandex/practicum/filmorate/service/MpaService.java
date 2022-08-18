@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.MpaStorage;
 
@@ -21,7 +21,7 @@ public class MpaService {
         if (getAllMpa().stream().anyMatch(x -> x.getId() == id)) {
             return mpaStorage.getMpaRating(id);
         } else {
-            throw new ModelNotFoundException("MPA not found with id " + id);
+            throw new NotFoundException("MPA not found with id " + id);
         }
     }
 

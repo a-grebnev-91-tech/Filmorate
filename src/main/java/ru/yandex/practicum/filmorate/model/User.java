@@ -17,6 +17,7 @@ public class User {
 
     @EqualsAndHashCode.Exclude
     private long id = 0;
+    //todo del this???
     private Set<Long> friends = new HashSet<>();
 
     @Email(message = "Email has to be correct")

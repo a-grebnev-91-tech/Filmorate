@@ -1,11 +1,11 @@
-package ru.yandex.practicum.filmorate.storage.validators;
+package ru.yandex.practicum.filmorate.validator;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Director;
 
@@ -28,7 +28,7 @@ public class DirectorValidate {
         SqlRowSet sqlRow = jdbcTemplate.queryForRowSet(CHECK_ID_DIR, directorId);
         if (!sqlRow.next()) {
             log.error("Director not found {}", directorId);
-            throw new ModelNotFoundException("Director not found");
+            throw new NotFoundException("Director not found");
         }
     }
 
@@ -64,7 +64,7 @@ public class DirectorValidate {
 
     public void validateFilmId(Long filmId) {
         if (filmId < 0) {
-            throw new ModelNotFoundException("filmId less than 0");
+            throw new NotFoundException("filmId less than 0");
         }
         SqlRowSet sqlRow = jdbcTemplate.queryForRowSet(CHECK_ID_FILM, filmId);
         if (!sqlRow.next()) {

@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class MyExceptionHandler {
 
-    @ExceptionHandler({ModelNotFoundException.class})
-    public ResponseEntity<String> handlerNotFoundUserOrFilm(ModelNotFoundException ex) {
+    @ExceptionHandler({NotFoundException.class})
+    public ResponseEntity<String> handlerNotFoundUserOrFilm(NotFoundException ex) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(ex.getMessage());
@@ -23,6 +23,7 @@ public class MyExceptionHandler {
                 .body(ex.getMessage());
     }
 
+    //todo del???
     @ExceptionHandler
     public ResponseEntity<String> handler(Throwable ex) {
         return ResponseEntity

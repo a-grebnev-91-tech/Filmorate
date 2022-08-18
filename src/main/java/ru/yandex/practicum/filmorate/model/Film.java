@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import ru.yandex.practicum.filmorate.validator.ValidReleaseDate;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -16,6 +17,8 @@ import java.util.*;
 public class Film {
     @EqualsAndHashCode.Exclude
     private long id;
+
+    //todo del this???
     private Set<Long> likes = new HashSet<>();
     private Set<Genre> genres = new HashSet<>();
     private Set<Director> directors = new HashSet<>();
@@ -27,6 +30,7 @@ public class Film {
     private String description;
 
     @NotNull
+    @ValidReleaseDate
     private LocalDate releaseDate;
 
     @Min(1)

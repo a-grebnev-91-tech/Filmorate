@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
 
@@ -21,7 +21,7 @@ public class GenreService {
         if (getAllGenres().stream().anyMatch(x -> x.getId() == id)) {
             return genreStorage.getGenreById(id);
         } else {
-            throw new ModelNotFoundException("Genre not found with id " + id);
+            throw new NotFoundException("Genre not found with id " + id);
         }
     }
 

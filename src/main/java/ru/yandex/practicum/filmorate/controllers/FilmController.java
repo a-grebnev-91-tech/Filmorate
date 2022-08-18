@@ -30,13 +30,9 @@ public class FilmController {
     }
 
     @PostMapping("/films")
-    public Film addFilm(@Valid @RequestBody Film film) throws ValidationException {
-        if (filmService.checkDate(film)) {
-            log.info("Film {} was added", film.getName());
-            return filmService.addFilm(film);
-        } else {
-            throw new ValidationException("Wrong release date");
-        }
+    public Film addFilm(@RequestBody @Valid Film film) throws ValidationException {
+        log.info("Film {} was added", film.getName());
+        return filmService.addFilm(film);
     }
 
     @GetMapping("/films/{id}")
@@ -46,13 +42,9 @@ public class FilmController {
     }
 
     @PutMapping("/films")
-    public Film changeFilm(@Valid @RequestBody Film film) throws ValidationException {
-        if (filmService.checkDate(film)) {
-            log.info("Film {} was changed", film.getId());
-            return filmService.changeFilm(film);
-        } else {
-            throw new ValidationException("Wrong release date");
-        }
+    public Film changeFilm(@RequestBody @Valid Film film) throws ValidationException {
+        log.info("Film {} was changed", film.getId());
+        return filmService.changeFilm(film);
     }
 
     @PutMapping("/films/{id}/like/{userId}")
@@ -96,7 +88,7 @@ public class FilmController {
     @GetMapping("/films/popular")
     public List<Film> getPopularFilmsByGenreAndYear(@RequestParam(defaultValue = "10") int count,
                                                     @RequestParam Optional<Long> genreId,
-                                                    @RequestParam Optional<Long> year){
+                                                    @RequestParam Optional<Long> year) {
         log.info("Get list of the most popular films by genre and(or) year.");
         return filmService.getPopularFilmsByGenreAndYear(count, genreId, year);
     }

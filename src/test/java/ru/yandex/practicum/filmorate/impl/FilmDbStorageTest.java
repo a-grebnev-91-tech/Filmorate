@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -85,7 +85,7 @@ class FilmDbStorageTest {
         wrongFilm.setId(2);
         filmDbStorage.createFilm(film);
 
-        ModelNotFoundException ex = assertThrows(ModelNotFoundException.class, () -> filmDbStorage.updateFilm(wrongFilm));
+        NotFoundException ex = assertThrows(NotFoundException.class, () -> filmDbStorage.updateFilm(wrongFilm));
 
         assertEquals("Film not found with id " + wrongFilm.getId(), ex.getMessage());
     }
@@ -125,7 +125,7 @@ class FilmDbStorageTest {
 
     @Test
     public void testGetFilmByIdWithFilmNotFoundException() {
-        ModelNotFoundException ex = assertThrows(ModelNotFoundException.class, () -> filmDbStorage.getFilmById(1));
+        NotFoundException ex = assertThrows(NotFoundException.class, () -> filmDbStorage.getFilmById(1));
 
         assertEquals("Film wasn't found", ex.getMessage());
     }
