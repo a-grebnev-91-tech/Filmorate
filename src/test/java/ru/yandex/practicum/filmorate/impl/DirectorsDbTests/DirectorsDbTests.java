@@ -116,6 +116,6 @@ public class DirectorsDbTests {
 
         film.addDirector(director);
         film2.addDirector(director);
-        filmService.like(film.getId(), user.getId());
+        filmService.addLike(film.getId(), user.getId());
     }
 }

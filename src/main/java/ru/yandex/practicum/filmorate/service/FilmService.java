@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.storage.*;
 
-import java.time.LocalDate;
 import java.util.*;
 
 @Slf4j
@@ -75,7 +74,7 @@ public class FilmService {
         return film;
     }
 
-    public void like(long filmId, long userId) {
+    public void addLike(long filmId, long userId) {
         likesStorage.addLike(filmId, userId);
         likesStorage.updateRate(filmId);
         Event event = new Event(userId, filmId, EventType.LIKE, EventOperations.ADD);
@@ -94,7 +93,7 @@ public class FilmService {
         }
     }
 
-    public List<Film> getFilms() {
+    public List<Film> getAllFilms() {
         List<Film> films = filmStorage.getAllFilms();
         films.forEach(this::constructFilm);
         return films;
@@ -111,7 +110,7 @@ public class FilmService {
         filmStorage.deleteFilm(id);
     }
 
-    public void deleteDirectorInFilm(long filmId, long directorId) {
+    public void removeDirectorFromFilm(long filmId, long directorId) {
         log.info("Start filmService. Method deleteDirectorInFilm. directorId:{},  filmId{}.", directorId, filmId);
         directorsStorage.deleteDirectorFromFilm(filmId, directorId);
     }
@@ -124,7 +123,7 @@ public class FilmService {
         }
     }
 
-    public List<Film> getSortedFilmsByDirector(Long directorId, String sortBy) {
+    public List<Film> getFilmsByDirector(Long directorId, String sortBy) {
         log.info("Start filmService. Method getSortFilmByDirector. directorId:{}, parameter:{}.", directorId, sortBy);
         directorsStorage.getDirector(directorId);
         List<Film> films;
@@ -142,7 +141,7 @@ public class FilmService {
         return films;
     }
 
-    public List<Film> getPopularFilmsSharedWithFriend(long userId, long friendId) {
+    public List<Film> getCommonFilms(long userId, long friendId) {
         List<Film> films = filmStorage.getPopularFilmsSharedWithFriend(userId, friendId);
         films.forEach(this::constructFilm);
         return films;

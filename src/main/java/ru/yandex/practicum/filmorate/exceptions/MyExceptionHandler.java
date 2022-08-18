@@ -16,6 +16,7 @@ public class MyExceptionHandler {
                 .body(ex.getMessage());
     }
 
+    //todo check to del
     @ExceptionHandler
     public ResponseEntity<String> handlerValidation(ValidationException ex) {
         return ResponseEntity

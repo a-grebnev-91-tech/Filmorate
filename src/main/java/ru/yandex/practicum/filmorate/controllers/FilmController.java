@@ -2,9 +2,7 @@ package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -12,9 +10,9 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
-@RestController
 @Slf4j
-@Validated
+@RestController
+@RequestMapping("/films")
 public class FilmController {
     private final FilmService filmService;
 
@@ -23,80 +21,79 @@ public class FilmController {
         this.filmService = filmService;
     }
 
-    @GetMapping("/films")
-    public List<Film> getFilms() {
-        log.info("Get all films");
-        return filmService.getFilms();
-    }
-
-    @PostMapping("/films")
-    public Film addFilm(@RequestBody @Valid Film film) throws ValidationException {
+    @PostMapping
+    public Film addFilm(@RequestBody @Valid Film film) {
         log.info("Film {} was added", film.getName());
         return filmService.addFilm(film);
     }
 
-    @GetMapping("/films/{id}")
+    @PutMapping("/{id}/like/{userId}")
+    public void addLike(@PathVariable("id") long filmId, @PathVariable long userId) {
+        log.info("User {} likes film {}", userId, filmId);
+        filmService.addLike(filmId, userId);
+    }
+
+    @GetMapping
+    public List<Film> getAllFilms() {
+        log.info("Get all films");
+        return filmService.getAllFilms();
+    }
+
+    @GetMapping("/common")
+    public List<Film> getCommonFilms(@RequestParam long userId, @RequestParam long friendId) {
+        log.info("Get popular films shared with a friend.");
+        return filmService.getCommonFilms(userId, friendId);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> getFilmsByDirector(@PathVariable long directorId,
+                                         @RequestParam String sortBy) {
+        log.info("Get sorted films by director with id {}", directorId);
+        return filmService.getFilmsByDirector(directorId, sortBy);
+    }
+
+    @GetMapping("/{id}")
     public Film getFilmById(@PathVariable long id) {
         log.info("Get film {}", id);
         return filmService.getFilmById(id);
     }
 
-    @PutMapping("/films")
-    public Film changeFilm(@RequestBody @Valid Film film) throws ValidationException {
-        log.info("Film {} was changed", film.getId());
-        return filmService.changeFilm(film);
-    }
-
-    @PutMapping("/films/{id}/like/{userId}")
-    public void like(@PathVariable long id, @PathVariable long userId) {
-        log.info("User {} likes film {}", userId, id);
-        filmService.like(id, userId);
-    }
-
-    @DeleteMapping("/films/{id}/like/{userId}")
-    public void deleteLike(@PathVariable long id, @PathVariable long userId) {
-        log.info("User {} deleted like from film {}", userId, id);
-        filmService.deleteLike(id, userId);
-    }
-
-    @DeleteMapping("/films/{id}")
-    public void deleteFilmById(@PathVariable long id) {
-        log.info("Delete film {}", id);
-        filmService.deleteFilm(id);
-    }
-
-
-    @GetMapping("/films/director/{directorId}")
-    public List<Film> getSortFilmByDirector(@PathVariable long directorId,
-                                            @RequestParam String sortBy) {
-        log.info("Get sorted films by director with id {}", directorId);
-        return filmService.getSortedFilmsByDirector(directorId, sortBy);
-    }
-
-    @DeleteMapping("/films{filmId}/directors/{directorId}")
-    public void deleteDirectorsFromFilm(@PathVariable long filmId, @PathVariable long directorId) {
-        log.info("Delete director {} from film {}", directorId, filmId);
-        filmService.deleteDirectorInFilm(filmId, directorId);
-    }
-
-    @GetMapping("/films/common")
-    public List<Film> getPopularFilmsSharedWithFriend(@RequestParam long userId, @RequestParam long friendId) {
-        log.info("Get popular films shared with a friend.");
-        return filmService.getPopularFilmsSharedWithFriend(userId, friendId);
-    }
-
-    @GetMapping("/films/popular")
-    public List<Film> getPopularFilmsByGenreAndYear(@RequestParam(defaultValue = "10") int count,
-                                                    @RequestParam Optional<Long> genreId,
-                                                    @RequestParam Optional<Long> year) {
+    @GetMapping("/popular")
+    public List<Film> getTopFilms(@RequestParam(defaultValue = "10") int count,
+                                  @RequestParam Optional<Long> genreId,
+                                  @RequestParam Optional<Long> year) {
         log.info("Get list of the most popular films by genre and(or) year.");
         return filmService.getPopularFilmsByGenreAndYear(count, genreId, year);
     }
 
-    @GetMapping("/films/search")
-    public List<Film> search(@RequestParam String query,
-                             @RequestParam List<String> by) {
+    @DeleteMapping("{filmId}/directors/{directorId}")
+    public void removeDirectorFromFilm(@PathVariable long filmId, @PathVariable long directorId) {
+        log.info("Delete director {} from film {}", directorId, filmId);
+        filmService.removeDirectorFromFilm(filmId, directorId);
+    }
+
+    @DeleteMapping("/{id}")
+    public void removeFilm(@PathVariable long id) {
+        log.info("Delete film {}", id);
+        filmService.deleteFilm(id);
+    }
+
+    @DeleteMapping("/{id}/like/{userId}")
+    public void removeLike(@PathVariable("id") long filmId, @PathVariable long userId) {
+        log.info("User {} deleted like from film {}", userId, filmId);
+        filmService.deleteLike(filmId, userId);
+    }
+
+    @GetMapping("/search")
+    public List<Film> searchFilm(@RequestParam String query,
+                                 @RequestParam List<String> by) {
         log.info("Searching substring '{}' at films {}", query, by);
         return filmService.searchFilm(query, by);
+    }
+
+    @PutMapping
+    public Film updateFilm(@RequestBody @Valid Film film) {
+        log.info("Film {} was updated", film.getId());
+        return filmService.changeFilm(film);
     }
 }
