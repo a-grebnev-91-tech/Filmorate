@@ -5,7 +5,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.ModelAlreadyExistException;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -29,16 +28,12 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User createUser(User user) {
         List<User> users = getAllUsers();
-        if (users.contains(user)) {
-            throw new ModelAlreadyExistException("User already exist");
-        } else {
             SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate)
                     .withTableName("users")
                     .usingGeneratedKeyColumns("user_id");
             long id = insert.executeAndReturnKey(user.toMap()).longValue();
             user.setId(id);
             return user;
-        }
     }
 
     @Override

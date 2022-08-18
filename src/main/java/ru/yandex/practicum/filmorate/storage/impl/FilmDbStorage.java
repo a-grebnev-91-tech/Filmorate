@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.ModelAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
@@ -27,17 +26,14 @@ public class FilmDbStorage implements FilmStorage {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    //todo
     @Override
     public long createFilm(Film film) {
         List<Film> allFilms = getAllFilms();
-        if (allFilms.contains(film)) {
-            throw new ModelAlreadyExistException("Film already exist");
-        } else {
             SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate)
                     .withTableName("films")
                     .usingGeneratedKeyColumns("film_id");
             return insert.executeAndReturnKey(film.toMap()).longValue();
-        }
     }
 
     @Override

@@ -24,13 +24,6 @@ public class MyExceptionHandler {
     }
 
     @ExceptionHandler
-    public ResponseEntity<String> handlerExistence(ModelAlreadyExistException ex) {
-        return ResponseEntity
-                .status(HttpStatus.CONFLICT)
-                .body(ex.getMessage());
-    }
-
-    @ExceptionHandler
     public ResponseEntity<String> handler(Throwable ex) {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)

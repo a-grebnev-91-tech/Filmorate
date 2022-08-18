@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.ModelAlreadyExistException;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Director;
@@ -15,6 +14,7 @@ import ru.yandex.practicum.filmorate.model.Director;
 public class DirectorValidate {
     private final JdbcTemplate jdbcTemplate;
     private static final String CHECK_ID_DIR = "SELECT * FROM DIRECTORS WHERE DIRECTOR_ID = ?";
+    //todo del
     private static final String CHECK_DIR = "SELECT * FROM DIRECTORS WHERE DIRECTOR_ID = ? and DIRECTOR_NAME = ?";
     private static final String CHECK_ID_FILM = "SELECT * FROM FILMS WHERE FILM_ID = ?";
 
@@ -32,12 +32,9 @@ public class DirectorValidate {
         }
     }
 
+    //todo del
     private void validateExistFilm(Director director) {
         SqlRowSet sqlRow = jdbcTemplate.queryForRowSet(CHECK_DIR, director.getId(), director.getName());
-        if (sqlRow.next()) {
-            log.error("Director already exist {}", director);
-            throw new ModelAlreadyExistException("Director already exist");
-        }
     }
 
     private void validateNameDirector(Director director) {
