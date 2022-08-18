@@ -42,9 +42,9 @@ class FilmDbStorageTest {
                 90, 4);
         film.setMpa(new Mpa(1, "G"));
         film.setId(1);
-        filmDbStorage.addFilm(film);
+        filmDbStorage.createFilm(film);
 
-        assertEquals(1, filmDbStorage.getFilms().size());
+        assertEquals(1, filmDbStorage.getAllFilms().size());
     }
 
     @Test
@@ -83,9 +83,9 @@ class FilmDbStorageTest {
                 90, 4);
         wrongFilm.setMpa(new Mpa(1, "G"));
         wrongFilm.setId(2);
-        filmDbStorage.addFilm(film);
+        filmDbStorage.createFilm(film);
 
-        ModelNotFoundException ex = assertThrows(ModelNotFoundException.class, () -> filmDbStorage.changeFilm(wrongFilm));
+        ModelNotFoundException ex = assertThrows(ModelNotFoundException.class, () -> filmDbStorage.updateFilm(wrongFilm));
 
         assertEquals("Film not found with id " + wrongFilm.getId(), ex.getMessage());
     }
@@ -98,10 +98,10 @@ class FilmDbStorageTest {
         film.setId(1);
 
         User user = new User(1, "email", "login", "name", LocalDate.of(2022, 8, 15));
-        userDbStorage.addUser(user);
+        userDbStorage.createUser(user);
 
         filmService.addFilm(film);
-        likesDbStorage.like(1, 1);
+        likesDbStorage.addLike(1, 1);
 
         assertEquals(1, filmService.getFilmById(1).getLikes().size());
     }
@@ -114,11 +114,11 @@ class FilmDbStorageTest {
         film.setId(1);
 
         User user = new User(1, "email", "login", "name", LocalDate.of(2022, 8, 15));
-        userDbStorage.addUser(user);
+        userDbStorage.createUser(user);
 
-        filmDbStorage.addFilm(film);
-        likesDbStorage.like(1, 1);
-        likesDbStorage.deleteLike(1, 1);
+        filmDbStorage.createFilm(film);
+        likesDbStorage.addLike(1, 1);
+        likesDbStorage.removeLike(1, 1);
 
         assertEquals(0, filmDbStorage.getFilmById(1).getLikes().size());
     }
@@ -132,7 +132,7 @@ class FilmDbStorageTest {
 
     @Test
     public void testGetMpaById() {
-        assertEquals("G", mpaDbStorage.getMpaById(1).getName());
+        assertEquals("G", mpaDbStorage.getMpaRating(1).getName());
     }
 
     @Test
@@ -144,7 +144,7 @@ class FilmDbStorageTest {
         mpa.add(new Mpa(4, "R"));
         mpa.add(new Mpa(5, "NC-17"));
 
-        assertEquals(mpa, mpaDbStorage.getAllMpa());
+        assertEquals(mpa, mpaDbStorage.getAllMpaRatings());
     }
 
     @Test

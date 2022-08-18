@@ -23,46 +23,52 @@ public class GenreDbStorage implements GenreStorage {
 
     @Override
     public Genre getGenreById(int id) {
-        String sql = "SELECT * " +
-                "FROM genre " +
-                "WHERE genre_id = ?";
-        return jdbcTemplate.queryForObject(sql, this::mapRowToGenre, id);
+        String sqlQuery =
+                "SELECT * " +
+                        "FROM genres " +
+                        "WHERE genre_id = ?";
+        return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToGenre, id);
     }
 
     @Override
     public List<Genre> getAllGenres() {
-        String sql = "SELECT * FROM genre";
-        return jdbcTemplate.query(sql, this::mapRowToGenre);
+        String sqlQuery = "SELECT * FROM genres";
+        return jdbcTemplate.query(sqlQuery, this::mapRowToGenre);
     }
 
     @Override
     public List<Genre> getFilmGenres(long idFilm) {
-        String sql = "SELECT g.genre_id, g.name " +
-                "FROM genre AS g " +
-                "LEFT JOIN genre_and_film AS gaf ON g.genre_id = gaf.genre_id " +
-                "WHERE gaf.film_id = ?";
-        return jdbcTemplate.query(sql, this::mapRowToGenre, idFilm);
+        String sqlQuery =
+                "SELECT g.genre_id, g.name " +
+                        "FROM genres AS g " +
+                        "LEFT JOIN films_genres AS fg ON g.genre_id = fg.genre_id " +
+                        "WHERE fg.film_id = ?";
+        return jdbcTemplate.query(sqlQuery, this::mapRowToGenre, idFilm);
     }
 
+    //todo refact this
     @Override
     public void addGenresToFilm(Film film, long idFilm) {
-        String sql = "INSERT INTO genre_and_film (genre_id, film_id) " +
+        String sqlQuery =
+                "INSERT INTO films_genres (genre_id, film_id) " +
                 "VALUES (?, ?)";
         Set<Genre> genres = film.getGenres();
         if (genres != null) {
             for (Genre genre : genres) {
-                jdbcTemplate.update(sql, genre.getId(), idFilm);
+                jdbcTemplate.update(sqlQuery, genre.getId(), idFilm);
             }
         }
     }
 
     @Override
     public void deleteFilmAllGenres(long idFilm) {
-        String sql = "DELETE FROM genre_and_film " +
+        String sqlQuery =
+                "DELETE FROM FILMS_GENRES " +
                 "WHERE film_id = ?";
-        jdbcTemplate.update(sql, idFilm);
+        jdbcTemplate.update(sqlQuery, idFilm);
     }
 
+    //todo refact this
     @Override
     public void changeFilmGenres(Film film) {
         if (film.getGenres().size() != 0) {
@@ -74,8 +80,8 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     private Genre mapRowToGenre(ResultSet resultSet, int i) throws SQLException {
-        int idGenre = resultSet.getInt("genre_id");
+        int id = resultSet.getInt("genre_id");
         String name = resultSet.getString("name");
-        return new Genre(idGenre, name);
+        return new Genre(id, name);
     }
 }

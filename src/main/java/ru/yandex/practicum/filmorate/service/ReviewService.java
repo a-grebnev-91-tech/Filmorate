@@ -31,7 +31,7 @@ public class ReviewService {
 
     public Review addReview(Review review) {
         if (isFilmExist(review.getFilmId()) && isExistUser(review.getUserId())) {
-            long id = reviewStorage.addReview(review);
+            long id = reviewStorage.createReview(review);
             review.setReviewId(id);
             Event event = new Event(review.getUserId(), id,
                     EventType.REVIEW,
@@ -44,8 +44,8 @@ public class ReviewService {
     }
 
     public Review changeReview(Review review) {
-        reviewStorage.changeReview(review);
-        Review result = reviewStorage.getReviewById(review.getReviewId());
+        reviewStorage.updateReview(review);
+        Review result = reviewStorage.getReview(review.getReviewId());
         Event event = new Event(result.getUserId(), review.getReviewId(),
                 EventType.REVIEW,
                 EventOperations.UPDATE);
@@ -64,7 +64,7 @@ public class ReviewService {
 
     public Review getReviewById(long id) {
         try {
-            return reviewStorage.getReviewById(id);
+            return reviewStorage.getReview(id);
         } catch (EmptyResultDataAccessException ex) {
             throw new ModelNotFoundException(String.format("Review with id %d isn't exist", id));
         }
@@ -73,9 +73,9 @@ public class ReviewService {
     public List<Review> getReviewByFilmId(Optional<Long> filmId, int count) {
         List<Review> allReviews;
         if (filmId.isPresent()) {
-            allReviews = reviewStorage.getReviewByFilmId(filmId.get(), count);
+            allReviews = reviewStorage.getFilmsReviews(filmId.get(), count);
         } else {
-            allReviews = reviewStorage.getCountReview(count);
+            allReviews = reviewStorage.getSomeReviews(count);
         }
         allReviews.sort((o1, o2) -> Integer.compare(o2.getUseful(), o1.getUseful()));
         return allReviews;
@@ -90,7 +90,7 @@ public class ReviewService {
     }
 
     private boolean isExistUser(long id) {
-        Optional<User> user = Optional.ofNullable(userStorage.findUserById(id));
+        Optional<User> user = Optional.ofNullable(userStorage.getUser(id));
         return user.isPresent();
     }
 

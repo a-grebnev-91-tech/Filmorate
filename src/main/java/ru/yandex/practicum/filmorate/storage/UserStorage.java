@@ -8,11 +8,11 @@ public interface UserStorage {
 
     List<User> getAllUsers();
 
-    User addUser(User user);
+    User createUser(User user);
 
-    User changeUser(User user);
+    User updateUser(User user);
 
-    User findUserById(long id);
+    User getUser(long id);
 
     List<User> getUserFriends(long id);
 

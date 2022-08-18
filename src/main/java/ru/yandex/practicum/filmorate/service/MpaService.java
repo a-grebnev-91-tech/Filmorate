@@ -19,13 +19,13 @@ public class MpaService {
 
     public Mpa getMpaById(int id) {
         if (getAllMpa().stream().anyMatch(x -> x.getId() == id)) {
-            return mpaStorage.getMpaById(id);
+            return mpaStorage.getMpaRating(id);
         } else {
             throw new ModelNotFoundException("MPA not found with id " + id);
         }
     }
 
     public List<Mpa> getAllMpa() {
-        return mpaStorage.getAllMpa();
+        return mpaStorage.getAllMpaRatings();
     }
 }

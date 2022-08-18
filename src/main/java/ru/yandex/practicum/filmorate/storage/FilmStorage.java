@@ -5,11 +5,11 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.util.List;
 
 public interface FilmStorage {
-    long addFilm(Film film);
+    long createFilm(Film film);
 
-    void changeFilm(Film film);
+    void updateFilm(Film film);
 
-    List<Film> getFilms();
+    List<Film> getAllFilms();
 
     Film getFilmById(long id);
 
@@ -27,7 +27,7 @@ public interface FilmStorage {
 
     List<Film> getPopularFilmsByGenreAndYear(int limit, long genreId, long year);
 
-    List<Film> getFilms(List<Long> ids);
+    List<Film> getSomeFilms(List<Long> ids);
     
     List<Film> searchByDirectors(String query);
 

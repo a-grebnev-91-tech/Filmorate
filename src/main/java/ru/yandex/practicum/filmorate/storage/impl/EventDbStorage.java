@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.EventOperations;
 import ru.yandex.practicum.filmorate.model.EventType;
@@ -17,7 +16,7 @@ import java.util.List;
 @Slf4j
 @Component
 public class EventDbStorage implements EventsStorage {
-    private static final String GET_EVENTS = "SELECT * FROM events WHERE event_user_id = ?";
+    private static final String GET_EVENTS = "SELECT * FROM events WHERE user_id = ?";
     private static final String GET_EVENT_BY_ID = "SELECT * FROM events WHERE event_id = ?";
     private final JdbcTemplate jdbcTemplate;
 
@@ -47,11 +46,11 @@ public class EventDbStorage implements EventsStorage {
     private Event mapRowToEvent(ResultSet rs, int rowNum) throws SQLException {
         return new Event(
                 rs.getLong("event_id"),
-                rs.getLong("event_user_id"),
+                rs.getLong("user_id"),
                 rs.getLong("entity_id"),
-                EventType.valueOf(rs.getString("event_type")),
-                EventOperations.valueOf(rs.getString("event_operation")),
-                rs.getLong("time_stamp")
+                EventType.valueOf(rs.getString("type")),
+                EventOperations.valueOf(rs.getString("operation")),
+                rs.getLong("timestamp")
         );
     }
 }

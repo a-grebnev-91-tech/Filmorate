@@ -16,7 +16,7 @@ public class DirectorValidate {
     private final JdbcTemplate jdbcTemplate;
     private static final String CHECK_ID_DIR = "SELECT * FROM DIRECTORS WHERE DIRECTOR_ID = ?";
     private static final String CHECK_DIR = "SELECT * FROM DIRECTORS WHERE DIRECTOR_ID = ? and DIRECTOR_NAME = ?";
-    private static final String CHECK_ID_FILM = "SELECT * FROM FILM WHERE FILM_ID = ?";
+    private static final String CHECK_ID_FILM = "SELECT * FROM FILMS WHERE FILM_ID = ?";
 
     @Autowired
     public DirectorValidate(JdbcTemplate jdbcTemplate) {

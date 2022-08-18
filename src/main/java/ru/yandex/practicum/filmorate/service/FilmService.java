@@ -10,11 +10,7 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.storage.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -43,11 +39,11 @@ public class FilmService {
 
     public Film addFilm(Film film) {
         film.setRate(0);
-        long idFilm = filmStorage.addFilm(film);
+        long idFilm = filmStorage.createFilm(film);
         genreStorage.addGenresToFilm(film, idFilm);
         film.setId(idFilm);
         addDirectorInFilm(film);
-        return getFilmById(idFilm);
+        return film;
     }
 
     public Film getFilmById(long id) {
@@ -73,14 +69,14 @@ public class FilmService {
         } catch (EmptyResultDataAccessException ex) {
             throw new ModelNotFoundException("Film wasn't found");
         }
-        filmStorage.changeFilm(film);
+        filmStorage.updateFilm(film);
         genreStorage.changeFilmGenres(film);
         directorsStorage.updateDirectorToFilm(film);
         return film;
     }
 
     public void like(long filmId, long userId) {
-        likesStorage.like(filmId, userId);
+        likesStorage.addLike(filmId, userId);
         likesStorage.updateRate(filmId);
         Event event = new Event(userId, filmId, EventType.LIKE, EventOperations.ADD);
         eventsStorage.addEvent(event);
@@ -89,7 +85,7 @@ public class FilmService {
     public void deleteLike(long filmId, long userId) {
         Film film = getFilmById(filmId);
         if (film.getLikes().contains(userId)) {
-            likesStorage.deleteLike(filmId, userId);
+            likesStorage.removeLike(filmId, userId);
             likesStorage.updateRate(filmId);
             Event event = new Event(userId, filmId, EventType.LIKE, EventOperations.REMOVE);
             eventsStorage.addEvent(event);
@@ -99,7 +95,7 @@ public class FilmService {
     }
 
     public List<Film> getFilms() {
-        List<Film> films = filmStorage.getFilms();
+        List<Film> films = filmStorage.getAllFilms();
         films.forEach(this::constructFilm);
         return films;
     }
@@ -172,15 +168,15 @@ public class FilmService {
     }
 
     public List<Film> getRecommendations(long userId) {
-        userStorage.findUserById(userId);
+        userStorage.getUser(userId);
         List<Long> recommendationsIds = likesStorage.getRecommendations(userId);
-        List<Film> recommendations = filmStorage.getFilms(recommendationsIds);
+        List<Film> recommendations = filmStorage.getSomeFilms(recommendationsIds);
         recommendations.forEach(this::constructFilm);
         return recommendations;
     }
 
     public List<Film> searchFilm(String query, List<String> by) {
-        List<Film> films = new ArrayList<>();
+        Set<Film> films = new TreeSet<>(Comparator.comparing(Film::getRate).reversed().thenComparing(Film::getId));
         for (String sortBy : by) {
             switch (sortBy) {
                 case "title":
@@ -194,8 +190,7 @@ public class FilmService {
             }
         }
         films.forEach(this::constructFilm);
-        films.sort(((o1, o2) -> Integer.compare(o2.getRate(), o1.getRate())));
-        return films;
+        return new ArrayList<>(films);
     }
 
     private void constructFilm(Film film) {

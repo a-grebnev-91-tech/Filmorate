@@ -18,7 +18,7 @@ public class Film {
     private long id;
     private Set<Long> likes = new HashSet<>();
     private Set<Genre> genres = new HashSet<>();
-    private Set<Director> Directors = new HashSet<>();
+    private Set<Director> directors = new HashSet<>();
 
     @NotBlank(message = "Name cannot be blank")
     private String name;
@@ -68,17 +68,29 @@ public class Film {
 
     public Map<String, Object> toMap() {
         Map<String, Object> values = new HashMap<>();
-        values.put("film_name", name);
+        values.put("name", name);
         values.put("description", description);
         values.put("release_date", releaseDate);
-        values.put("duration_film", duration);
+        values.put("duration", duration);
         values.put("rate", rate);
         values.put("mpa_id", mpa.getId());
-
         return values;
     }
 
     public void addDirector(Director director) {
-        this.Directors.add(director);
+        this.directors.add(director);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Film film = (Film) o;
+        return id == film.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

@@ -27,7 +27,7 @@ public class User {
 
     private String name;
 
-    @Past(message = "Birthday have to be in the past")
+    @Past(message = "Birthdate have to be in the past")
     private LocalDate birthday;
 
     public User(int id, String email, String login, String name, LocalDate birthday) {
@@ -61,8 +61,8 @@ public class User {
         Map<String, Object> values = new HashMap<>();
         values.put("email", email);
         values.put("login", login);
-        values.put("user_name", name);
-        values.put("birth_date", birthday);
+        values.put("name", name);
+        values.put("birthdate", birthday);
         return values;
     }
 }

@@ -33,32 +33,32 @@ public class UserService {
     }
 
     public User addUser(User user) {
-        return userStorage.addUser(user);
+        return userStorage.createUser(user);
     }
 
     public User changeUser(User user) {
-        userStorage.findUserById(user.getId());
-        return userStorage.changeUser(user);
+        userStorage.getUser(user.getId());
+        return userStorage.updateUser(user);
     }
 
     public void addFriendToUser(long userId, long friendId) {
-        userStorage.findUserById(userId);
-        userStorage.findUserById(friendId);
+        userStorage.getUser(userId);
+        userStorage.getUser(friendId);
         friendStorage.addFriendToUser(userId, friendId);
         Event event = new Event(userId, friendId, EventType.FRIEND, EventOperations.ADD);
         eventsStorage.addEvent(event);
     }
 
     public void deleteFromFriend(long userId, long friendId) {
-        userStorage.findUserById(userId);
-        userStorage.findUserById(friendId);
+        userStorage.getUser(userId);
+        userStorage.getUser(friendId);
         friendStorage.deleteFromFriends(userId, friendId);
         Event event = new Event(userId, friendId, EventType.FRIEND, EventOperations.REMOVE);
         eventsStorage.addEvent(event);
     }
 
     public List<User> getUserFriends(long id) {
-        userStorage.findUserById(id);
+        userStorage.getUser(id);
         List<User> userFriends = new ArrayList<>();
         List<Long> friendsId = friendStorage.getUserFriends(id);
         for (Long oneId : friendsId) {
@@ -74,7 +74,7 @@ public class UserService {
     }
 
     public User getUserById(long id) {
-        return userStorage.findUserById(id);
+        return userStorage.getUser(id);
     }
 
     public User checkName(User user) {
@@ -85,12 +85,12 @@ public class UserService {
     }
 
     public void deleteUser(long id) {
-        userStorage.findUserById(id);
+        userStorage.getUser(id);
         userStorage.deleteUser(id);
     }
 
     public List<Event> getEvents(Long id) {
-        userStorage.findUserById(id);
+        userStorage.getUser(id);
         return eventsStorage.getEvents(id);
     }
 }
